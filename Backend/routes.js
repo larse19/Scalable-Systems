@@ -1,3 +1,4 @@
+// https://www.smashingmagazine.com/2021/01/dialogflow-agent-react-application/
 const express = require("express");
 const Dialogflow = require("@google-cloud/dialogflow");
 const { v4 } = require("uuid");
@@ -9,17 +10,18 @@ var jsonParser = bodyParser.json();
 
 const app = express();
 
+const sessionClient = new Dialogflow.SessionsClient({
+  keyFilename: Path.join(__dirname, "./key.json"),
+});
+
 app.post("/text-input", jsonParser, async (req, res) => {
-  const { message, context } = req.body;
-  console.log(message);
+  const { message, contexts } = req.body;
+  console.log(contexts);
   // Create a new session
-  const sessionClient = new Dialogflow.SessionsClient({
-    keyFilename: Path.join(__dirname, "./key.json"),
-  });
 
   const sessionPath = sessionClient.projectAgentSessionPath(
     "scalable-systems-gcjw",
-    v4()
+    "123456"
   );
 
   // The dialogflow request object
@@ -27,13 +29,17 @@ app.post("/text-input", jsonParser, async (req, res) => {
     session: sessionPath,
     queryInput: {
       text: {
-        // The query to send to the dialogflow agent
         text: message,
         languageCode: "en",
       },
-      context: context,
     },
   };
+
+  if (contexts && contexts.length > 0) {
+    request.queryParams = {
+      contexts: contexts,
+    };
+  }
 
   // Sends data from the agent as a response
   try {
@@ -46,8 +52,66 @@ app.post("/text-input", jsonParser, async (req, res) => {
 });
 //res.status(200).send({ data: "TEXT ENDPOINT CONNECTION SUCCESSFUL" });
 
+const { pipeline, Transform } = require("stream");
+const busboy = require("connect-busboy");
+const util = require("promisfy");
+
+app.use(
+  busboy({
+    immediate: true,
+  })
+);
+
 app.post("/voice-input", (req, res) => {
-  res.status(200).send({ data: "VOICE ENDPOINT CONNECTION SUCCESSFUL" });
+  const sessionPath = sessionClient.projectAgentSessionPath(
+    process.env.PROJECT_ID,
+    uuid()
+  );
+
+  // transform into a promise
+  const pump = util.promisify(pipeline);
+
+  const audioRequest = {
+    session: sessionPath,
+    queryInput: {
+      audioConfig: {
+        audioEncoding: "AUDIO_ENCODING_OGG_OPUS",
+        sampleRateHertz: "16000",
+        languageCode: "en-US",
+      },
+      singleUtterance: true,
+    },
+  };
+
+  const streamData = null;
+  const detectStream = sessionClient
+    .streamingDetectIntent()
+    .on("error", (error) => console.log(error))
+    .on("data", (data) => {
+      streamData = data.queryResult;
+    })
+    .on("end", (data) => {
+      res.status(200).send({ data: streamData.fulfillmentText });
+    });
+
+  detectStream.write(audioRequest);
+
+  try {
+    req.busboy.on("file", (_, file, filename) => {
+      pump(
+        file,
+        new Transform({
+          objectMode: true,
+          transform: (obj, _, next) => {
+            next(null, { inputAudio: obj });
+          },
+        }),
+        detectStream
+      );
+    });
+  } catch (e) {
+    console.log(`error  : ${e}`);
+  }
 });
 
 module.exports = app;
