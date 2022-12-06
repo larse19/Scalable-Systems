@@ -1,6 +1,7 @@
 import logo from "./logo.svg";
 import "./App.css";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import AudioRecorder from "./Components/AudioRecorder";
 
 function App() {
   const [value, setValue] = useState("");
@@ -11,6 +12,13 @@ function App() {
     lifespanCount: 0,
     parameters: {},
   });
+  let speech = new SpeechSynthesisUtterance();
+  var voices = window.speechSynthesis.getVoices();
+  speech.voice = voices[7];
+  speech.volume = 1; // From 0 to 1
+  speech.rate = 1; // From 0.1 to 10
+  speech.pitch = 1.1; // From 0 to 2
+  speech.lang = "en";
 
   const executeQuery = (message) => {
     console.log(message);
@@ -37,8 +45,10 @@ function App() {
             .repository
         ) {
           setRepo(
-            response.data[0].queryResult.outputContexts[0].parameters.fields
-              .repository.stringValue
+            response.data[0].queryResult.outputContexts[0].parameters.fields.repository.stringValue.replaceAll(
+              " ",
+              ""
+            )
           );
           setContext(response.data[0].queryResult.outputContexts);
         }
@@ -47,6 +57,11 @@ function App() {
       })
       .catch((e) => console.log(e));
   };
+
+  useEffect(() => {
+    speech.text = response;
+    window.speechSynthesis.speak(speech);
+  }, [response]);
 
   return (
     <div className="App">
@@ -75,6 +90,7 @@ function App() {
           >
             Submite
           </button>
+          <AudioRecorder />
           <h2>{response}</h2>
         </div>
       </body>

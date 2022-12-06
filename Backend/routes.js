@@ -1,7 +1,7 @@
 // https://www.smashingmagazine.com/2021/01/dialogflow-agent-react-application/
 const express = require("express");
 const Dialogflow = require("@google-cloud/dialogflow");
-const { v4 } = require("uuid");
+// const { v4 } = require("uuid");
 require("dotenv").config();
 const Path = require("path");
 
@@ -54,7 +54,8 @@ app.post("/text-input", jsonParser, async (req, res) => {
 
 const { pipeline, Transform } = require("stream");
 const busboy = require("connect-busboy");
-const util = require("promisfy");
+const util = require("util");
+require("util.promisify").shim();
 
 app.use(
   busboy({
@@ -64,8 +65,8 @@ app.use(
 
 app.post("/voice-input", (req, res) => {
   const sessionPath = sessionClient.projectAgentSessionPath(
-    process.env.PROJECT_ID,
-    uuid()
+    "scalable-systems-gcjw",
+    "1234"
   );
 
   // transform into a promise
@@ -83,7 +84,7 @@ app.post("/voice-input", (req, res) => {
     },
   };
 
-  const streamData = null;
+  let streamData = null;
   const detectStream = sessionClient
     .streamingDetectIntent()
     .on("error", (error) => console.log(error))
@@ -91,7 +92,7 @@ app.post("/voice-input", (req, res) => {
       streamData = data.queryResult;
     })
     .on("end", (data) => {
-      res.status(200).send({ data: streamData.fulfillmentText });
+      res.status(200).send({ data: streamData });
     });
 
   detectStream.write(audioRequest);
