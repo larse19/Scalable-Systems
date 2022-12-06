@@ -73,7 +73,7 @@ function App() {
             style={{ height: 20, width: 100, marginTop: 20 }}
             onClick={() => executeQuery(value)}
           >
-            Submite
+            Submit
           </button>
           <h2>{response}</h2>
         </div>
