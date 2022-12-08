@@ -3,11 +3,13 @@ import React, { useState, useEffect } from "react";
 import Axios from "axios";
 import MicRecorder from "mic-recorder-to-mp3";
 
-const AudioRecorder = () => {
+const AudioRecorder = ({ onSubmit }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [blobURL, setBlobURL] = useState("");
   const [isBlocked, setIsBlocked] = useState(false);
-  const Mp3Recorder = new MicRecorder({ bitRate: 128 });
+  const [Mp3Recorder, setMP3Recorder] = useState(
+    new MicRecorder({ bitRate: 128 })
+  );
 
   useEffect(() => {
     navigator.getUserMedia(
@@ -40,7 +42,9 @@ const AudioRecorder = () => {
       .getMp3()
       .then(([buffer, blob]) => {
         const _blobURL = URL.createObjectURL(blob);
+        console.log(blob);
         setBlobURL(_blobURL);
+        onSubmit(blob);
         setIsRecording(false);
       })
       .catch((e) => console.log(e));

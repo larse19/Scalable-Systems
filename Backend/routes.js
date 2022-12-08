@@ -66,7 +66,7 @@ app.use(
 app.post("/voice-input", (req, res) => {
   const sessionPath = sessionClient.projectAgentSessionPath(
     "scalable-systems-gcjw",
-    "1234"
+    "12345"
   );
 
   // transform into a promise
@@ -89,7 +89,8 @@ app.post("/voice-input", (req, res) => {
     .streamingDetectIntent()
     .on("error", (error) => console.log(error))
     .on("data", (data) => {
-      streamData = data.queryResult;
+      streamData = { data: data.queryResult, audio: data.outputAudio };
+      console.log(data);
     })
     .on("end", (data) => {
       res.status(200).send({ data: streamData });
@@ -108,7 +109,9 @@ app.post("/voice-input", (req, res) => {
           },
         }),
         detectStream
-      );
+      )
+        .then((res) => console.log("res", res))
+        .catch((e) => console.log("--erppr", e));
     });
   } catch (e) {
     console.log(`error  : ${e}`);
