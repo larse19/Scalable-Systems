@@ -58,7 +58,6 @@ const AudioRecorder = ({ onSubmit }) => {
       <button onClick={stop} disabled={!isRecording}>
         Stop
       </button>
-      <audio src={blobURL} controls="controls" />
     </div>
   );
 };

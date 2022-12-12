@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  padding: 10px;
 }
 
 .App-logo {
@@ -35,4 +36,20 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+table,
+th,
+td {
+  border: 1px solid;
+  border-color: black;
+}
+
+th,
+td {
+  padding: 10px;
+}
+
+input {
+  width: 20em;
 }

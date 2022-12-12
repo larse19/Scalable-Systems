@@ -8,12 +8,12 @@ import Axios from "axios";
 function App() {
   const [value, setValue] = useState("");
   const [response, setResponse] = useState("");
+  const [textResponse, setTextResponse] = useState("");
+  const [results, setResults] = useState([]);
   const [repo, setRepo] = useState("none");
   const [audioOutput, setAudioOutput] = useState(null);
   const [responseBlob, setResponseBlob] = useState();
-  const [Mp3Recorder, setMP3Recorder] = useState(
-    new MicRecorder({ bitRate: 128 })
-  );
+  const [Mp3Recorder, setMP3Recorder] = useState(new MicRecorder({ bitRate: 128 }));
   const [context, setContext] = useState({
     name: "",
     lifespanCount: 0,
@@ -36,7 +36,7 @@ function App() {
     const formData = new FormData();
     formData.append("voiceInput", inputFile);
 
-    Axios.post(`http://localhost:5000/api/agent/voice-input`, formData, {
+    Axios.post(`http://localhost:5050/api/agent/voice-input`, formData, {
       headers: {
         "Content-Type": "multipart/formdata",
       },
@@ -50,7 +50,7 @@ function App() {
   const executeQuery = (message) => {
     console.log(message);
 
-    fetch("http://localhost:5000/api/agent/text-input", {
+    fetch("http://localhost:5050/api/agent/text-input", {
       method: "POST",
       headers: {
         "Content-Type": "application/json; charset=utf-8",
@@ -59,26 +59,19 @@ function App() {
     })
       .then((response) => response.json())
       .then((response) => {
-        setResponse(
-          response.data[0].queryResult.fulfillmentMessages[0].text.text
-        );
-        setAudioOutput(response.data[0].outputAudio.data);
         console.log(response);
-        console.log(
-          response.data[0].queryResult.outputContexts[0].parameters.fields
-            .repository
-        );
-        if (
-          response.data[0].queryResult.outputContexts[0].parameters.fields
-            .repository
-        ) {
-          setRepo(
-            response.data[0].queryResult.outputContexts[0].parameters.fields.repository.stringValue.replaceAll(
-              " ",
-              ""
-            )
-          );
-          setContext(response.data[0].queryResult.outputContexts);
+        setTextResponse(response.data.text);
+        setResults(response.data.results);
+        setResponse(response.data.responses[0].queryResult.fulfillmentMessages[0].text.text);
+        // setAudioOutput(response.data.responses[0].outputAudio.data);
+        // console.log(response);
+        // console.log(
+        //   response.data.responses[0].queryResult.outputContexts[0].parameters
+        //     .fields.repository
+        // );
+        setRepo(response.data.responses[0].queryResult.parameters.fields.repository.stringValue.replaceAll(" ", ""));
+        if (response.data.responses[0].queryResult.outputContexts) {
+          setContext(response.data.responses[0].queryResult.outputContexts);
         }
 
         console.log(response);
@@ -87,44 +80,66 @@ function App() {
   };
 
   useEffect(() => {
-    speech.text = response;
+    speech.text = textResponse;
     window.speechSynthesis.speak(speech);
-    if (audioOutput) {
-      const _url = URL.createObjectURL(audioOutput);
-      setResponseBlob(_url);
-    }
-  }, [response, audioOutput]);
+  }, [textResponse]);
 
   return (
     <div className="App">
-      <body className="App-header">
-        <h1>
-          Checked out repository: <p>{repo}</p>
-        </h1>
+      <body>
         <div
           style={{
             display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            width: "100%",
           }}
         >
-          <label>
-            {"Query: "}
-            <input
-              type="text"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-            />
-          </label>
-          <button
-            style={{ height: 20, width: 100, marginTop: 20 }}
-            onClick={() => executeQuery(value)}
+          <div
+            style={{
+              paddingRight: "10px",
+            }}
           >
-            Submit
-          </button>
-          <AudioRecorder onSubmit={executeVoiceQuery} />
-          <h2>{response}</h2>
-          <audio src={responseBlob} controls="controls" />
+            <label>
+              {"Query: "}
+              <input type="text" value={value} onChange={(e) => setValue(e.target.value)} />
+            </label>
+            <button style={{ height: 20, width: 100, marginTop: 20 }} onClick={() => executeQuery(value)}>
+              Submit
+            </button>
+            {/* <AudioRecorder onSubmit={executeVoiceQuery} /> */}
+            <h2>{textResponse}</h2>
+          </div>
+          <div>
+            <table>
+              <tr>
+                <th>ID</th>
+                <th>Repository name</th>
+                <th>Event Type</th>
+                <th>Action</th>
+                <th>Issue Title</th>
+                <th>Issue Body</th>
+                <th>User</th>
+                <th>Created At</th>
+                <th>Closed At</th>
+              </tr>
+              {results?.map((result, i) => {
+                return (
+                  <tr key={i}>
+                    <td>{result.repoId}</td>
+                    <td>{result.reponame}</td>
+                    <td>{result.eventType}</td>
+                    <td>{result.action}</td>
+                    <td>{result.title}</td>
+                    <td>{result.issueBody}</td>
+                    <td>{result.user}</td>
+                    <td>{result.created_at}</td>
+                    <td>{result.closed_at}</td>
+                  </tr>
+                );
+              })}
+            </table>
+          </div>
         </div>
       </body>
     </div>
