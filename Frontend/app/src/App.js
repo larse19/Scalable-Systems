@@ -113,26 +113,30 @@ function App() {
           <div>
             <table>
               <tr>
-                <th>ID</th>
+                {/* <th>ID</th> */}
                 <th>Repository name</th>
+                <th>Issue Title</th>
+                <th>Issue State</th>
                 <th>Event Type</th>
                 <th>Action</th>
-                <th>Issue Title</th>
-                <th>Issue Body</th>
+                <th>Body</th>
                 <th>User</th>
+                <th>Time of event</th>
                 <th>Created At</th>
                 <th>Closed At</th>
               </tr>
               {results?.map((result, i) => {
                 return (
                   <tr key={i}>
-                    <td>{result.repoId}</td>
+                    {/* <td>{result.repoId}</td> */}
                     <td>{result.reponame}</td>
+                    <td>{result.title}</td>
+                    <td>{result.issueState}</td>
                     <td>{result.eventType}</td>
                     <td>{result.action}</td>
-                    <td>{result.title}</td>
-                    <td>{result.issueBody}</td>
+                    <td>{result.issueBody ?? result.commentBody}</td>
                     <td>{result.user}</td>
+                    <td>{result.eventTime}</td>
                     <td>{result.created_at}</td>
                     <td>{result.closed_at}</td>
                   </tr>
