@@ -25,7 +25,7 @@ function App() {
   speech.volume = 1; // From 0 to 1
   speech.rate = 1; // From 0.1 to 10
   speech.pitch = 1; // From 0 to 2
-  speech.lang = "dk-da";
+  speech.lang = "en";
 
   const executeVoiceQuery = (blob) => {
     console.log(blob);
