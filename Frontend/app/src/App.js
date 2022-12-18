@@ -8,6 +8,7 @@ function App() {
   const [response, setResponse] = useState("");
   const [textResponse, setTextResponse] = useState("");
   const [results, setResults] = useState([]);
+  const [intent, setIntent] = useState("");
   const [repo, setRepo] = useState("none");
   const [audioOutput, setAudioOutput] = useState(null);
   const [responseBlob, setResponseBlob] = useState();
@@ -61,6 +62,7 @@ function App() {
         setTextResponse(response.data.text);
         setResults(response.data.results);
         setResponse(response.data.responses[0].queryResult.fulfillmentMessages[0].text.text);
+        setIntent(response.data.responses[0].queryResult.intent.displayName);
         // setAudioOutput(response.data.responses[0].outputAudio.data);
         // console.log(response);
         // console.log(
@@ -115,40 +117,42 @@ function App() {
             {/* <AudioRecorder onSubmit={executeVoiceQuery} /> */}
             <h2>{textResponse}</h2>
           </div>
-          <div>
-            <table>
-              <tr>
-                {/* <th>ID</th> */}
-                <th>Repository name</th>
-                <th>Issue Title</th>
-                <th>Issue State</th>
-                <th>Event Type</th>
-                <th>Action</th>
-                <th>Body</th>
-                <th>User</th>
-                <th>Time of event</th>
-                <th>Created At</th>
-                <th>Closed At</th>
-              </tr>
-              {results?.map((result, i) => {
-                return (
-                  <tr key={i}>
-                    {/* <td>{result.repoId}</td> */}
-                    <td>{result.reponame}</td>
-                    <td>{result.title}</td>
-                    <td>{result.issueState}</td>
-                    <td>{result.eventType}</td>
-                    <td>{result.action}</td>
-                    <td>{result.issueBody ?? result.commentBody}</td>
-                    <td>{result.user}</td>
-                    <td>{result.eventTime}</td>
-                    <td>{result.created_at}</td>
-                    <td>{result.closed_at}</td>
-                  </tr>
-                );
-              })}
-            </table>
-          </div>
+          {results?.length > 0 && intent === "Open Issues" && (
+            <div>
+              <table>
+                <tr>
+                  {/* <th>ID</th> */}
+                  <th>Repository name</th>
+                  <th>Issue Title</th>
+                  <th>Issue State</th>
+                  <th>Event Type</th>
+                  <th>Action</th>
+                  <th>Body</th>
+                  <th>User</th>
+                  <th>Time of event</th>
+                  <th>Created At</th>
+                  <th>Closed At</th>
+                </tr>
+                {results?.map((result, i) => {
+                  return (
+                    <tr key={i}>
+                      {/* <td>{result.repoId}</td> */}
+                      <td>{result.reponame}</td>
+                      <td>{result.title}</td>
+                      <td>{result.issueState}</td>
+                      <td>{result.eventType}</td>
+                      <td>{result.action}</td>
+                      <td>{result.issueBody ?? result.commentBody}</td>
+                      <td>{result.user}</td>
+                      <td>{result.eventTime}</td>
+                      <td>{result.created_at}</td>
+                      <td>{result.closed_at}</td>
+                    </tr>
+                  );
+                })}
+              </table>
+            </div>
+          )}
         </div>
       </body>
     </div>

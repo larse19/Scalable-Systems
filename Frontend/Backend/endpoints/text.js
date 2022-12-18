@@ -7,6 +7,7 @@ const openIssues = require("../fulfillment/openIssues");
 const Path = require("path");
 const Dialogflow = require("@google-cloud/dialogflow");
 const { stringify } = require("querystring");
+const getTopIssuesClosed = require("../fulfillment/topIssuesClosed");
 const sessionClient = new Dialogflow.SessionsClient({
   keyFilename: Path.join(__dirname, "../key.json"),
 });
@@ -49,12 +50,22 @@ app.post("/text-input", jsonParser, async (req, res) => {
       results: [],
       responses,
     };
+    let repoName = "";
     switch (intent) {
       case "Open Issues":
-        const repoName =
+        repoName =
           responses[0].queryResult?.parameters?.fields?.repository?.stringValue;
         if (repoName) {
           const { text, results } = await openIssues(repoName);
+          response.text = text;
+          response.results = results;
+        }
+        break;
+      case "Most Issues Closed":
+        repoName =
+          responses[0].queryResult?.parameters?.fields?.repository?.stringValue;
+        if (repoName) {
+          const { text, results } = await getTopIssuesClosed(repoName);
           response.text = text;
           response.results = results;
         }
