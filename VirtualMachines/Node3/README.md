@@ -1,0 +1,1 @@
+You have to SSH into Node3 and expose port 5000 to be able to make requests to "localhost:5000/{endpoint}"
