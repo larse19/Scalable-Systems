@@ -90,8 +90,8 @@ function App() {
         <div
           style={{
             display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
+            flexDirection: "column",
+            alignItems: "center",
             width: "100%",
           }}
         >
