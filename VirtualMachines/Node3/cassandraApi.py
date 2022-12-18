@@ -1,9 +1,11 @@
-from cassandra.cluster import Cluster
-from flask import Flask, request, jsonify, Response
-from kafka import KafkaConsumer
-import os
 import datetime
 import json
+import os
+from statistics import mode
+
+from cassandra.cluster import Cluster
+from flask import Flask, Response, jsonify, request
+from kafka import KafkaConsumer
 
 app = Flask(__name__)
 
@@ -85,13 +87,30 @@ def get_all_issues():
 def get_open_issues():
     bodyName = request.args.get('repoName')
     app.logger.info(bodyName)
-    prepared_statement = session.prepare("SELECT * FROM issuesinfo WHERE reponame=? AND issueState='open' AND eventtype='IssuesEvent' ALLOW FILTERING")
+    prepared_statement = session.prepare("SELECT * FROM issuesinfo WHERE reponame=? AND issueState='closed' AND eventtype='IssuesEvent' ALLOW FILTERING")
     repo = session.execute(prepared_statement, [bodyName])
     result = []
     for row in repo:
        
         result.append(toIssueJson(row))
         app.logger.info(row)
+    return jsonify(result)
+    #return repo.reponame
+
+def flatten(l):
+    return [item for sublist in l for item in sublist]
+
+@app.route('/top-closed-issues', methods=['GET'])
+def get_top_closed_issues():
+    bodyName = request.args.get('repoName')
+    app.logger.info(bodyName)
+    prepared_statement = session.prepare("SELECT user FROM issuesinfo WHERE reponame=? AND issueState='closed' AND eventtype='IssuesEvent' ALLOW FILTERING")
+    repo = session.execute(prepared_statement, [bodyName])
+    result = []
+    list = flatten(repo)
+    user = mode(list)
+    result.append(user)
+    result.append(list.count(user))
     return jsonify(result)
     #return repo.reponame
 
