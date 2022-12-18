@@ -15,5 +15,11 @@
     "stream": "^0.0.2",
     "util.promisify": "^1.1.1",
     "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^8.11.0"
+  },
+  "scripts": {
+    "start": "nodemon index.js"
   }
 }
