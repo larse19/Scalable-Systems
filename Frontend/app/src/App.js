@@ -1,9 +1,7 @@
-import logo from "./logo.svg";
-import "./App.css";
-import React, { useState, useEffect } from "react";
-import AudioRecorder from "./Components/AudioRecorder";
-import MicRecorder from "mic-recorder-to-mp3";
 import Axios from "axios";
+import MicRecorder from "mic-recorder-to-mp3";
+import React, { useEffect, useState } from "react";
+import "./App.css";
 
 function App() {
   const [value, setValue] = useState("");
@@ -100,6 +98,13 @@ function App() {
               paddingRight: "10px",
             }}
           >
+            {/* <iframe
+              allow="microphone;"
+              width="350"
+              height="430"
+              src="https://console.dialogflow.com/api-client/demo/embedded/22a9c2d1-2e0d-49b9-99f8-87c3011e180c"
+            ></iframe> */}
+
             <label>
               {"Query: "}
               <input type="text" value={value} onChange={(e) => setValue(e.target.value)} />
